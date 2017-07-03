@@ -42,6 +42,13 @@ program
           let apiTem = filefunc.loadTemplate('api.js')
           apiTem = apiTem.replace(/\{apiName\}/g, 'defaultApi')
           filefunc.writeFile(cwd + '/shooter/api/defaultApi.js', apiTem, 0666)
+        } else {
+          let arr = apiType.split(',')
+          for (let i=0;i<arr.length;i++) {
+            let apiTem = filefunc.loadTemplate('api.js')
+            apiTem = apiTem.replace(/\{apiName\}/g, arr[i].replace(/(^\s*)|(\s*$)/g, ''))
+            filefunc.writeFile(cwd + `/shooter/api/${arr[i].replace(/(^\s*)|(\s*$)/g, '')}.js`, apiTem, 0666)
+          }
         }
         // init finish.
         process.exit(0)
@@ -101,7 +108,7 @@ program
           let str = ''
           for (let i=0;i<arr.length;i++) {
             let param = filefunc.loadTemplate('param.template')
-            param = param.replace(/\{block\}/g, arr[i])
+            param = param.replace(/\{block\}/g, arr[i].replace(/(^\s*)|(\s*$)/g, ''))
             str = str + '      ' + param + ',\n'
           }
           funTem = funTem.replace('{params}', str)
