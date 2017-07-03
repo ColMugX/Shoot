@@ -1,0 +1,13 @@
+{funcName} (data) {
+  let params = {
+    url: '{url}',
+    body: {
+{params}
+    }
+  }
+
+  return new Promise((resolved, reject) => {
+    ApiManager.{method}(params,res => resolved(res.data), err => reject(err))
+  })
+},
+//shootMark
