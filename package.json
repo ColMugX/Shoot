@@ -1,0 +1,27 @@
+{
+  "name": "shoot-generator",
+  "version": "0.0.2",
+  "description": "a api manager tool with Bandix",
+  "main": "bin/shoot",
+  "bin": {
+    "shoot": "bin/shoot"
+  },
+  "author": "colmugx",
+  "license": "MIT",
+  "engines": {
+    "node": ">= 7.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ColMugX/Shoot.git"
+  },
+  "dependencies": {
+    "co": "^4.6.0",
+    "co-prompt": "^1.0.0",
+    "commander": "^2.10.0",
+    "mkdirp": "^0.5.1"
+  },
+  "devDependencies": {
+    "mocha": "^3.4.2"
+  }
+}

@@ -1,0 +1,145 @@
+#!/usr/bin/env node
+
+var os = require('os')
+var fs = require('fs')
+var path = require('path')
+var co = require('co')
+var prompt = require('co-prompt')
+var mkdirp = require('mkdirp')
+var program = require('commander')
+var filefunc = require('../src/FileFunc.js')
+var version = require('../package.json').version
+var cwd = process.cwd()
+var eol = os.EOL
+
+program
+  .version(version)
+  .description('Shoot your API in Manager! Also with Bandix! NOW HERE WE GO!')
+  .usage('<command>')
+  .option('-a, --add <file>', 'Add a api file into api folder.')
+  .option('-i, --import', 'import a api json into Manager.')
+
+program
+  .command('init')
+  .description('init your ApiManaer (with Bandix or vue program).')
+  .action(function () {
+    co(function* () {
+      let config = {}
+      config.headers = {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+      }
+      config.baseURL = yield prompt('base_url: ')
+      let apiType = yield prompt('api file name(split with ","): ')
+      //mkdir shoot folder
+      filefunc.mkdir(cwd + '/shooter/api', function () {
+        // add config
+        filefunc.writeFile(cwd + '/shooter/config.js', 'export default ' + JSON.stringify(config,{}, 2))
+        // add apimanager
+        filefunc.copyTemplate('ApiManager.js', cwd + '/shooter/ApiManager.js')
+        // create api file
+        if (apiType == null || apiType == '') {
+          console.log('default create api file: defaultApi')
+          let apiTem = filefunc.loadTemplate('api.js')
+          apiTem = apiTem.replace(/\{apiName\}/g, 'defaultApi')
+          filefunc.writeFile(cwd + '/shooter/api/defaultApi.js', apiTem, 0666)
+        }
+        // init finish.
+        process.exit(0)
+      })
+    })
+  })
+
+program
+  .command('keep')
+  .description('Keep Shoot! press "exit" and stop!')
+  .usage('<url> <name> <file_name> <method> [data(split with ",")]')
+  .action(function () {
+    co(function* () {
+      while (true) {
+        let a = yield prompt('> ')
+        // Listening to 'exit'
+        if (typeof a == 'string' && a === 'exit') {
+          process.exit(0)
+        }
+        // get params
+        let params = a.split(' ')
+        let url    = params[0]
+            name   = params[1]
+            _path  = params[2]
+            method = params[3] || 'get'
+            data   = params[4] || ''
+        // verify
+        if (url[0] !== '/') {
+          console.log('Shooter fail: Illegal URL')
+          process.exit(0)
+        }
+        if (typeof name == 'undefined') {
+          console.log('Shooter fail: Not Name!')
+          process.exit(0)
+        }
+        if (typeof _path == 'undefined') {
+          console.log('Shooter fail: Not Path!')
+          process.exit(0)
+        }
+        let file = path.join(cwd, 'shooter', 'api', _path)
+        let exist = filefunc.exists(file)
+        if (!exist) {
+          console.log('Shooter fail: not ' + path + 'file in directory. you must use Shoot on project \'s root directory.')
+          process.exit(0)
+        }
+        // load template
+        let apiTem = filefunc.readFile(file)
+        let funTem = filefunc.loadTemplate('func.template')
+        // process
+        funTem = funTem.replace('{funcName}', name)
+        funTem = funTem.replace('{url}', url)
+        funTem = funTem.replace('{method}', method)
+        if (data.length === 0) {
+          funTem = funTem.replace('{params}', '')
+        } else {
+          let arr = data.split(',')
+          let str = ''
+          for (let i=0;i<arr.length;i++) {
+            let param = filefunc.loadTemplate('param.template')
+            param = param.replace(/\{block\}/g, arr[i])
+            str = str + '      ' + param + ',\n'
+          }
+          funTem = funTem.replace('{params}', str)
+        }
+        apiTem = apiTem.replace('//shootMark', eol + funTem)
+        filefunc.writeFile(file, apiTem)
+        let result = {
+          url: url,
+          "function name": name,
+          "api file": _path,
+          method: method,
+          body: data
+        }
+        console.log('Shoot Complete!\n' + JSON.stringify(result, {}, 2))
+      }
+    })
+  })
+
+if (!process.argv.slice(2).length) {
+  program.outputHelp()
+}
+
+program.parse(process.argv)
+
+if (program.add) {
+  let fileName = program.add
+  console.log('Shooter! creating ' + fileName + '...')
+  let dir = path.join(cwd, 'shooter', 'api')
+  let exist = filefunc.exists(dir)
+  if (!exist) {
+    console.log('Not Found \'api\' directory, you must init api manager with Shoot!')
+    return
+  }
+  let apiTem = filefunc.loadTemplate('api.js')
+  apiTem = apiTem.replace(/\{apiName\}/g, fileName)
+  filefunc.writeFile(cwd + `/shooter/api/${fileName}.js`, apiTem, 0666)
+}
+
+if (program.import) {
+  console.log('Sorry! it use in JBangit only.')
+}
