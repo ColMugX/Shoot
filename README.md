@@ -1,6 +1,10 @@
 # shoot-generator
 
 自用偷懒工具，搭配Bandix使用（但是现在没有）
+```sh
+npm install -g shoot-generator
+```
+
 
 ```
   Usage: shoot <command>
