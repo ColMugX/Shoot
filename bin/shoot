@@ -17,6 +17,7 @@ program
   .description('Shoot your API in Manager! Also with Bandix! NOW HERE WE GO!')
   .usage('<command>')
   .option('-a, --add <file>', 'Add a api file into api folder.')
+  .option('-A, --bdadd <file>', 'Add a api file into bandix api folder.')
   .option('-i, --import', 'import a api json into Manager.')
 
 program
@@ -26,7 +27,7 @@ program
     co(function* () {
       let bdx = ''
       if (command !== 'bandix') bdx = ''
-      else bdx = '/src'
+      else {bdx = '/src';console.log('creating in bandix.')}
       let config = {}
       config.headers = {
         'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
@@ -99,10 +100,10 @@ program
           console.log('Shooter fail: Not Path!')
           process.exit(0)
         }
-        let file = path.join(cwd, bdx, 'shooter', 'api', _path)
+        let file = path.join(cwd, bdx, 'shooter', 'api', _path + '.js')
         let exist = filefunc.exists(file)
         if (!exist) {
-          console.log('Shooter fail: not ' + _path + 'file in directory. you must use Shoot on project \'s root directory.')
+          console.log('Shooter fail: not ' + _path + ' in directory. you must use Shoot on project \'s root directory.')
           process.exit(0)
         }
         // load template
@@ -120,11 +121,12 @@ program
           for (let i=0;i<arr.length;i++) {
             let param = filefunc.loadTemplate('param.template')
             param = param.replace(/\{block\}/g, arr[i].replace(/(^\s*)|(\s*$)/g, ''))
-            str = str + '      ' + param + ',\n'
+            str = str + '        ' + param + ',' + eol
           }
           funTem = funTem.replace('{params}', str)
         }
-        apiTem = apiTem.replace('//shootMark', eol + funTem)
+        funTem = funTem.replace(/\n(\n)*( )*(\n)*\n/g, '\n')
+        apiTem = apiTem.replace('  //shootMark', eol + funTem)
         filefunc.writeFile(file, apiTem)
         let result = {
           url: url,
@@ -156,6 +158,20 @@ if (program.add) {
   let apiTem = filefunc.loadTemplate('api.js')
   apiTem = apiTem.replace(/\{apiName\}/g, fileName)
   filefunc.writeFile(cwd + `/shooter/api/${fileName}.js`, apiTem, 0666)
+}
+if (program.bdadd) {
+  let bdx = '/src'
+  let fileName = program.bdadd
+  console.log('Shooter! creating ' + fileName + '...')
+  let dir = path.join(cwd, bdx, 'shooter', 'api')
+  let exist = filefunc.exists(dir)
+  if (!exist) {
+    console.log('Not Found \'api\' directory, you must init api manager with Shoot!')
+    return
+  }
+  let apiTem = filefunc.loadTemplate('api.js')
+  apiTem = apiTem.replace(/\{apiName\}/g, fileName)
+  filefunc.writeFile(cwd + bdx + `/shooter/api/${fileName}.js`, apiTem, 0666)
 }
 
 if (program.import) {

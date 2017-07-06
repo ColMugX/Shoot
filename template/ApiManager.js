@@ -1,13 +1,13 @@
 import axios from 'axios'
-import CONFIG from 'config'
+import CONFIG from './config'
 
 class ApiManager {
   /**
    * Network Request：function GET
    *
    * @param {Object} data (url, body, header)
-   * @param {function(Object)} success request success
-   * @param {function(Object)} failure request failure
+   * @param {Function} success request success
+   * @param {Function} failure request failure
    */
   get (data, success, failure) {
     let method = 'get'
@@ -17,8 +17,8 @@ class ApiManager {
    * Network Request：function POST
    *
    * @param {Object} data (url, body, header)
-   * @param {function(Object)} success request success
-   * @param {function(Object)} failure request failure
+   * @param {Function} success request success
+   * @param {Function} failure request failure
    */
   post (data, success, failure) {
     let method = 'post'
@@ -28,8 +28,8 @@ class ApiManager {
    * Network Request：function DELETE
    *
    * @param {Object} data (url, body, header)
-   * @param {function(Object)} success request success
-   * @param {function(Object)} failure request failure
+   * @param {Function} success request success
+   * @param {Function} failure request failure
    */
   delete (data, success, failure) {
     let method = 'delete'
@@ -39,8 +39,8 @@ class ApiManager {
    * Network Request：function PUT
    *
    * @param {Object} data (url, body, header)
-   * @param {function(Object)} success request success
-   * @param {function(Object)} failure request failure
+   * @param {Function} success request success
+   * @param {Function} failure request failure
    */
   put (data, success, failure) {
     let method = 'put'
@@ -51,8 +51,8 @@ class ApiManager {
    *
    * @param {Object} data request data
    * @param {String} method request method
-   * @param {function(Object)} success request success
-   * @param {function(Object)} fail request failure
+   * @param {Function} success request success
+   * @param {Function} fail request failure
    */
   _sendRequest (data, method, success, failure) {
     let config = Object.assign({}, CONFIG)
