@@ -109,7 +109,7 @@ program
         let funTem = filefunc.loadTemplate('func.template')
         // process
         funTem = funTem.replace('{funcName}', name)
-        funTem = funTem.replace('{url}', url)
+        funTem = funTem.replace('{url}', `'${url}'`)
         funTem = funTem.replace('{method}', method)
         if (data.length === 0) {
           funTem = funTem.replace('{params}', '')

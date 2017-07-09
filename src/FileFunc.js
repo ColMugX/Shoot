@@ -2,6 +2,8 @@ var path   = require('path')
     fs     = require('fs')
     mkdirp = require('mkdirp')
 
+var eol = require('os').EOL
+
 module.exports = {
   copyTemplate: function (src, tar) {
     src = path.join(__dirname, '..', 'template', src)
@@ -24,6 +26,10 @@ module.exports = {
 
   readFile: function (src) {
     return fs.readFileSync(src, 'utf-8')
+  },
+
+  append: function (src, data) {
+    return fs.appendFileSync(src, eol + data)
   },
 
   mkdir: function (path, cb) {
