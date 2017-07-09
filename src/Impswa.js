@@ -1,9 +1,7 @@
 var os      = require('os')
     process = require('process')
-
-var fs = require('fs')
-
-var path = require('path')
+    fs = require('fs')
+    path = require('path')
 
 var eol = os.EOL
     cwd = process.cwd()
@@ -42,6 +40,7 @@ module.exports = function (src) {
   // read paths
   let paths = json.paths
   for (let aths in paths) {
+    console.log('now writing' + aths)
     //1. get url
     if (/\{|\}/.test(aths) === true) {
       var url = `\`${aths.replace(/\{(\S*)\}/, '${' + aths.match(/\{(\S*)\}/)[1] + '}')}\``
@@ -91,6 +90,6 @@ module.exports = function (src) {
       apiTem = apiTem.replace('  //shootMark', eol+funTem)
       filefunc.writeFile(file, apiTem)
     }
+    console.log('complete' + aths)
   }
-  console.log('finish')
 }
