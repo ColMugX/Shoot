@@ -1,4 +1,10 @@
-  {funcName} (data) {
+/**
+ * summary: {summary}
+ * 
+ * @param {any} data data
+ * @returns return
+ */
+  {funcName} ({data}) {
     let params = {
       url: {url},
       body: {

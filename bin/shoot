@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 
 var os = require('os')
-var fs = require('fs')
 var path = require('path')
 var co = require('co')
 var prompt = require('co-prompt')
-var mkdirp = require('mkdirp')
 var program = require('commander')
 var filefunc = require('../src/FileFunc.js')
 var version = require('../package.json').version
@@ -17,13 +15,17 @@ program
   .description('Shoot your API in Manager! Also with Bandix! NOW HERE WE GO!')
   .usage('<command>')
   .option('-a, --add <file>', 'Add a api file into api folder.')
-  .option('-i, --import', 'import a api json into Manager.')
+  .option('-A, --bdadd <file>', 'Add a api file into bandix api folder.')
+  .option('-i, --import <path>', 'drop a swagger file into terminal.')
 
 program
-  .command('init')
+  .command('init [command]')
   .description('init your ApiManaer (with Bandix or vue program).')
-  .action(function () {
+  .action(function (command) {
     co(function* () {
+      let bdx = ''
+      if (command !== 'bandix') bdx = ''
+      else {bdx = '/src';console.log('creating in bandix.')}
       let config = {}
       config.headers = {
         'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
@@ -31,17 +33,24 @@ program
       config.baseURL = yield prompt('base_url: ')
       let apiType = yield prompt('api file name(split with ","): ')
       //mkdir shoot folder
-      filefunc.mkdir(cwd + '/shooter/api', function () {
+      filefunc.mkdir(cwd + bdx + '/shooter/api', function () {
         // add config
-        filefunc.writeFile(cwd + '/shooter/config.js', 'export default ' + JSON.stringify(config,{}, 2))
+        filefunc.writeFile(cwd + bdx + '/shooter/config.js', 'export default ' + JSON.stringify(config,{}, 2))
         // add apimanager
-        filefunc.copyTemplate('ApiManager.js', cwd + '/shooter/ApiManager.js')
+        filefunc.copyTemplate('ApiManager.js', cwd + bdx + '/shooter/ApiManager.js')
         // create api file
         if (apiType == null || apiType == '') {
           console.log('default create api file: defaultApi')
           let apiTem = filefunc.loadTemplate('api.js')
           apiTem = apiTem.replace(/\{apiName\}/g, 'defaultApi')
-          filefunc.writeFile(cwd + '/shooter/api/defaultApi.js', apiTem, 0666)
+          filefunc.writeFile(cwd + bdx + '/shooter/api/defaultApi.js', apiTem, 0666)
+        } else {
+          let arr = apiType.split(',')
+          for (let i=0;i<arr.length;i++) {
+            let apiTem = filefunc.loadTemplate('api.js')
+            apiTem = apiTem.replace(/\{apiName\}/g, arr[i].replace(/(^\s*)|(\s*$)/g, ''))
+            filefunc.writeFile(cwd + bdx + `/shooter/api/${arr[i].replace(/(^\s*)|(\s*$)/g, '')}.js`, apiTem, 0666)
+          }
         }
         // init finish.
         process.exit(0)
@@ -50,11 +59,19 @@ program
   })
 
 program
-  .command('keep')
+  .command('keep [command]')
   .description('Keep Shoot! press "exit" and stop!')
   .usage('<url> <name> <file_name> <method> [data(split with ",")]')
-  .action(function () {
+  .action(function (command) {
     co(function* () {
+      let bdx = 'src'
+      if (command !== 'bandix') bdx = ''
+      else {bdx = 'src';console.log('Use on Bandix!')}
+      let isShoot = filefunc.exists(path.join(cwd, bdx, 'shooter'))
+      if (!isShoot) {
+        console.log('YOU CAN\'T CREATE API MANAGER WITH SHOOT! SO CANNOT KEEP!')
+        process.exit(0)
+      }
       while (true) {
         let a = yield prompt('> ')
         // Listening to 'exit'
@@ -81,10 +98,10 @@ program
           console.log('Shooter fail: Not Path!')
           process.exit(0)
         }
-        let file = path.join(cwd, 'shooter', 'api', _path)
+        let file = path.join(cwd, bdx, 'shooter', 'api', _path + '.js')
         let exist = filefunc.exists(file)
         if (!exist) {
-          console.log('Shooter fail: not ' + path + 'file in directory. you must use Shoot on project \'s root directory.')
+          console.log('Shooter fail: not ' + _path + ' in directory. you must use Shoot on project \'s root directory.')
           process.exit(0)
         }
         // load template
@@ -92,7 +109,7 @@ program
         let funTem = filefunc.loadTemplate('func.template')
         // process
         funTem = funTem.replace('{funcName}', name)
-        funTem = funTem.replace('{url}', url)
+        funTem = funTem.replace('{url}', `'${url}'`)
         funTem = funTem.replace('{method}', method)
         if (data.length === 0) {
           funTem = funTem.replace('{params}', '')
@@ -101,12 +118,13 @@ program
           let str = ''
           for (let i=0;i<arr.length;i++) {
             let param = filefunc.loadTemplate('param.template')
-            param = param.replace(/\{block\}/g, arr[i])
-            str = str + '      ' + param + ',\n'
+            param = param.replace(/\{block\}/g, arr[i].replace(/(^\s*)|(\s*$)/g, ''))
+            str = str + '        ' + param + ',' + eol
           }
           funTem = funTem.replace('{params}', str)
         }
-        apiTem = apiTem.replace('//shootMark', eol + funTem)
+        funTem = funTem.replace(/\n(\n)*( )*(\n)*\n/g, '\n')
+        apiTem = apiTem.replace('  //shootMark', eol + funTem)
         filefunc.writeFile(file, apiTem)
         let result = {
           url: url,
@@ -140,6 +158,23 @@ if (program.add) {
   filefunc.writeFile(cwd + `/shooter/api/${fileName}.js`, apiTem, 0666)
 }
 
+if (program.bdadd) {
+  let bdx = '/src'
+  let fileName = program.bdadd
+  console.log('Shooter! creating ' + fileName + '...')
+  let dir = path.join(cwd, bdx, 'shooter', 'api')
+  let exist = filefunc.exists(dir)
+  if (!exist) {
+    console.log('Not Found \'api\' directory, you must init api manager with Shoot!')
+    return
+  }
+  let apiTem = filefunc.loadTemplate('api.js')
+  apiTem = apiTem.replace(/\{apiName\}/g, fileName)
+  filefunc.writeFile(cwd + bdx + `/shooter/api/${fileName}.js`, apiTem, 0666)
+}
+
 if (program.import) {
-  console.log('Sorry! it use in JBangit only.')
+  // console.log('Sorry! it use in JBangit only.')
+  var impSwa = require('../src/Impswa.js')
+  impSwa(program.import)
 }
