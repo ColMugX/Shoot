@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 
 var os = require('os')
-var fs = require('fs')
 var path = require('path')
 var co = require('co')
 var prompt = require('co-prompt')
-var mkdirp = require('mkdirp')
 var program = require('commander')
 var filefunc = require('../src/FileFunc.js')
 var version = require('../package.json').version
@@ -18,7 +16,7 @@ program
   .usage('<command>')
   .option('-a, --add <file>', 'Add a api file into api folder.')
   .option('-A, --bdadd <file>', 'Add a api file into bandix api folder.')
-  .option('-i, --import', 'import a api json into Manager.')
+  .option('-i, --import <path>', 'drop a swagger file into terminal.')
 
 program
   .command('init [command]')
@@ -159,6 +157,7 @@ if (program.add) {
   apiTem = apiTem.replace(/\{apiName\}/g, fileName)
   filefunc.writeFile(cwd + `/shooter/api/${fileName}.js`, apiTem, 0666)
 }
+
 if (program.bdadd) {
   let bdx = '/src'
   let fileName = program.bdadd
@@ -175,5 +174,7 @@ if (program.bdadd) {
 }
 
 if (program.import) {
-  console.log('Sorry! it use in JBangit only.')
+  // console.log('Sorry! it use in JBangit only.')
+  var impSwa = require('../src/Impswa.js')
+  impSwa(program.import)
 }

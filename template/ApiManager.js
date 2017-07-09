@@ -1,5 +1,6 @@
 import axios from 'axios'
 import CONFIG from './config'
+import qs from 'querystring'
 
 class ApiManager {
   /**
@@ -59,10 +60,10 @@ class ApiManager {
     config.method = method
     config.headers = data.header ? data.header : config.headers
     config.url = data.url
-    if (method === 'get') {
+    if (method !== 'post') {
       config.params = data.body
     } else {
-      config.data = data.body
+      config.data = qs.stringify(data.body)
     }
     axios.defaults.withCredentials = true
     return axios(config).then(res => {

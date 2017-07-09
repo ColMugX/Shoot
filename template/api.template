@@ -1,0 +1,13 @@
+import ApiManager from '../ApiManager'
+
+/**
+ * ====================
+ * - {apiName} File
+ * - Description: {description}
+ * - Created with Shoot!
+ * ====================
+ */
+
+export default {
+  //shootMark
+}
