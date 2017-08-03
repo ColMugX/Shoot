@@ -1,6 +1,6 @@
 {
   "name": "shoot-generator",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "a api manager tool with Bandix",
   "main": "bin/shoot",
   "bin": {

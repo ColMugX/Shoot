@@ -1,5 +1,7 @@
 # shoot-generator
 
+[![NPM](https://nodei.co/npm/shoot-generator.png)](https://nodei.co/npm/shoot-generator/)
+
 自用偷懒工具，搭配Bandix使用（但是现在没有）
 ```sh
 npm install -g shoot-generator

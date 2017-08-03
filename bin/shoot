@@ -37,7 +37,7 @@ program
         // add config
         filefunc.writeFile(cwd + bdx + '/shooter/config.js', 'export default ' + JSON.stringify(config,{}, 2))
         // add apimanager
-        filefunc.copyTemplate('ApiManager.js', cwd + bdx + '/shooter/ApiManager.js')
+        filefunc.copyTemplate('am.template', cwd + bdx + '/shooter/ApiManager.js')
         // create api file
         if (apiType == null || apiType == '') {
           console.log('default create api file: defaultApi')
@@ -106,7 +106,7 @@ program
         }
         // load template
         let apiTem = filefunc.readFile(file)
-        let funTem = filefunc.loadTemplate('func.template')
+        let funTem = filefunc.loadTemplate('f.template')
         // process
         funTem = funTem.replace('{funcName}', name)
         funTem = funTem.replace('{url}', `'${url}'`)
@@ -117,7 +117,7 @@ program
           let arr = data.split(',')
           let str = ''
           for (let i=0;i<arr.length;i++) {
-            let param = filefunc.loadTemplate('param.template')
+            let param = filefunc.loadTemplate('p.template')
             param = param.replace(/\{block\}/g, arr[i].replace(/(^\s*)|(\s*$)/g, ''))
             str = str + '        ' + param + ',' + eol
           }

@@ -22,14 +22,18 @@ module.exports = function (src) {
     console.log('Not Found \'api\' directory, you must init api manager with Shoot!')
     return
   }
+  let np = []
   aTags.forEach(tag => {
     let n = tag.name;d = tag.description
     console.log('Shooter! creating ' + n + '...')
+    filefunc.append(path.join(_path, 'index.js'), `import ${n}Api from './api/${n}Api'\r`)
+    np.push(n+'Api')
     let apiTem = filefunc.loadTemplate('api.template')
     apiTem = apiTem.replace(/\{apiName\}/g, n)
     apiTem = apiTem.replace(/\{description\}/g, d)
     filefunc.writeFile(path.join(apitar, n + 'Api.js'), apiTem, 0666)
   })
+  filefunc.append(path.join(_path, 'index.js'), `\rexport { ${np.join(',')} }`)
   // add headers in config
   if (!filefunc.exists(_path, 'config.js')) return
   // let conFile = filefunc.readFile(path.join(_path, 'config.js'))
@@ -50,12 +54,12 @@ module.exports = function (src) {
     //2. get method and then
     for (let met in paths[aths]) {
       // load tem
-      let funTem = filefunc.loadTemplate('swaFunc.template')
+      let funTem = filefunc.loadTemplate('s.template')
       // add url
       funTem = funTem.replace(/\{url\}/g, url)
       // add data
       if (/\$\{|\}/.test(url) === true) {
-        funTem = funTem.replace(/\{data\}/g, `data, ${url.match(/\$\{(\S*)\}/)[1]}`)
+        funTem = funTem.replace(/\{data\}/g, `${url.match(/\$\{(\S*)\}/)[1]}, data`)
       } else {
         funTem = funTem.replace(/\{data\}/g, `data`)
       }
@@ -63,9 +67,15 @@ module.exports = function (src) {
       let method = met
       funTem = funTem.replace(/\{method\}/g, method)
       // add func name
-      funTem = funTem.replace(/\{funcName\}/g, met + (aths.split('/')[aths.split('/').length-1].toLowerCase().replace(/( |^)[a-z]/g, (L) => L.toUpperCase())))
+      if (paths[aths][met]['apiMethod']) funTem = funTem.replace(/\{funcName\}/g, paths[aths][met]['apiMethod'])
+      else funTem = funTem.replace(/\{funcName\}/g, met + (aths.split('/')[aths.split('/').length-1].toLowerCase().replace(/( |^)[a-z]/g, (L) => L.toUpperCase())))
       // add summary
       funTem = funTem.replace(/\{summary\}/g, paths[aths][met]['summary'])
+      // add header
+      if (paths[aths][met]['consumes']) {
+        let header = `header: {'Content-Type': '${paths[aths][met]['consumes'][0]}'},`
+        funTem = funTem.replace(/\{header\}/g, header)
+      } else funTem = funTem.replace(/\{header\}/g, '')
       // add params
       let paras = paths[aths][met]['parameters']
       let pt = ''
@@ -73,13 +83,13 @@ module.exports = function (src) {
         for (let item=0;item<paras.length;item++) {
           if (paras[item].in == 'path') {}
           else {
-            let param = filefunc.loadTemplate('param.template')
+            let param = filefunc.loadTemplate('p.template')
             param = param.replace(/\{block\}/g, paras[item].name)
             pt = pt + '        ' + param + ',' + eol
           }
         }
       } else {
-        let param = filefunc.loadTemplate('param.template')
+        let param = filefunc.loadTemplate('p.template')
         param = param.replace(/\{block\}/g, ``)
       }
       funTem = funTem.replace(/\{params\}/g, pt)
