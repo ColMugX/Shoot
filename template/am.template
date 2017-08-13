@@ -1,5 +1,6 @@
 import axios from 'axios'
 import CONFIG from './config'
+import {CONSUMES as consumes} from './config'
 import qs from 'querystring'
 
 class ApiManager {
@@ -53,25 +54,25 @@ class ApiManager {
    * @param {Object} data request data
    * @param {String} method request method
    */
-  _sendRequest (data) {
+  _sendRequest (data, callback) {
     let config = Object.assign({}, CONFIG)
     config.method = data.method
     config.headers = data.header ? data.header : config.headers
     config.url = data.url
-    if (method !== 'post') {
-      config.params = data.body
-    } else {
-      config.data = qs.stringify(data.body)
+    if (method === 'get') config.params = data.body
+    else {
+      if (config.headers['Content-Type'].indexOf('application/json') >= 0 || config.headers['Content-Type'].indexOf('multipart/form-data') >= 0) {
+        config.data = data.body
+      } else {
+        config.headers = consumes
+        config.data = qs.stringify(data.body)
+      }
     }
     axios.defaults.withCredentials = true
     return axios(config).then(res => {
-      if (!res || !res.data) {
-        return Promise.reject(res)
-      }
-      return Promise.resolve(res)
-    }).catch(err => {
-      return Promise.reject(err)
-    })
+      if (!res || !res.data) return callback && callback(-1, res)
+      return callback && callback(0, res)
+    }).catch(err => callback && callback(2, err))
   }
 }
 let apiManager = new ApiManager()

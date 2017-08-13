@@ -59,9 +59,9 @@ module.exports = function (src) {
       funTem = funTem.replace(/\{url\}/g, url)
       // add data
       if (/\$\{|\}/.test(url) === true) {
-        funTem = funTem.replace(/\{data\}/g, `${url.match(/\$\{(\S*)\}/)[1]}, data`)
+        funTem = funTem.replace(/\{data\}/g, `${url.match(/\$\{(\S*)\}/)[1]}, {params}`)
       } else {
-        funTem = funTem.replace(/\{data\}/g, `data`)
+        funTem = funTem.replace(/\{data\}/g, `{params}`)
       }
       // add method
       let method = met
@@ -83,15 +83,12 @@ module.exports = function (src) {
         for (let item=0;item<paras.length;item++) {
           if (paras[item].in == 'path') {}
           else {
-            let param = filefunc.loadTemplate('p.template')
-            param = param.replace(/\{block\}/g, paras[item].name)
-            pt = pt + '        ' + param + ',' + eol
+            let param = paras[item].name
+            pt = pt + param + ', '
           }
         }
-      } else {
-        let param = filefunc.loadTemplate('p.template')
-        param = param.replace(/\{block\}/g, ``)
       }
+      pt = pt.substring(0, pt.lastIndexOf(','))
       funTem = funTem.replace(/\{params\}/g, pt)
       funTem = funTem.replace(/\n(\n)*( )*(\n)*\n/g, '\n')
       // 3. find api file
