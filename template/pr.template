@@ -1,0 +1,15 @@
+<?php
+
+$urls = [
+    
+//shootMark
+];
+
+$app->group(['namespace' => '', 'prefix' => ''], function () use ($app, $urls) {
+    foreach ($urls as $url) {
+        $functions = $url['functions'];
+        foreach ($functions as $val) {
+            setRoute($app, $val[0], $url['controller'], $val[1], $val[2]);
+        }
+    }
+}); 

@@ -17,6 +17,7 @@ program
   .option('-a, --add <file>', 'Add a api file into api folder.')
   .option('-A, --bdadd <file>', 'Add a api file into bandix api folder.')
   .option('-i, --import <path>', 'drop a swagger file into terminal.')
+  .option('-p, --php <path>', 'drop a swagger file into terminal.')
 
 program
   .command('init [command]')
@@ -177,4 +178,9 @@ if (program.import) {
   // console.log('Sorry! it use in JBangit only.')
   var impSwa = require('../src/Impswa.js')
   impSwa(program.import)
+}
+
+if (program.php) {
+  var phpSwa = require('../src/Phpswa.js')
+  phpSwa(program.php)
 }

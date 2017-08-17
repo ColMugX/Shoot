@@ -1,0 +1,5 @@
+    [
+        'controller' => '{apiName}ApiController',
+        'functions' => {apiFunction}
+    ],
+//shootMark
