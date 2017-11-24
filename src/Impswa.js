@@ -1,9 +1,9 @@
-var os      = require('os')
-    process = require('process')
-    fs = require('fs')
+var os      = require('os'),
+    process = require('process'),
+    fs = require('fs'),
     path = require('path')
 
-var eol = os.EOL
+var eol = os.EOL,
     cwd = process.cwd()
 
 var filefunc = require('./FileFunc')
@@ -24,7 +24,7 @@ module.exports = function (src) {
   }
   let np = []
   aTags.forEach(tag => {
-    let n = tag.name;d = tag.description
+    let n = tag.name, d = tag.description
     console.log('Shooter! creating ' + n + '...')
     filefunc.append(path.join(_path, 'index.js'), `import ${n}Api from './api/${n}Api'\r`)
     np.push(n+'Api')
@@ -37,7 +37,7 @@ module.exports = function (src) {
   // add headers in config
   if (!filefunc.exists(_path, 'config.js')) return
   // let conFile = filefunc.readFile(path.join(_path, 'config.js'))
-  let consumes = `${eol}export const CONSUMES = {'content-type': '${json.consumes[0]}'}`
+  let consumes = `${eol}export const CONSUMES = {'content-type': '${json.consumes[0]}'}`,
       produces = `${eol}export const PRODUCES = {'content-type': '${json.produces[0]}'}`
   fs.appendFileSync(path.join(_path, 'config.js'), consumes)
   fs.appendFileSync(path.join(_path, 'config.js'), produces)
@@ -81,15 +81,19 @@ module.exports = function (src) {
       let pt = ''
       if (typeof paras == 'object' && paras.length > 0) {
         for (let item=0;item<paras.length;item++) {
-          if (paras[item].in == 'path') {}
-          else {
-            let param = paras[item].name
-            pt = pt + param + ', '
-          }
+          let desc = ` * @param {${paras[item].type === 'integer' ? 'number' : paras[item].type}} ${paras[item].name} ${paras[item].description}`
+          funTem = funTem.replace(/\{description\}/g, desc + eol + '{description}')
+          if (paras[item].in == 'path') continue
+
+          let param = paras[item].name
+          pt = pt + param + ', '
+
         }
       }
       pt = pt.substring(0, pt.lastIndexOf(','))
+      if (/\, \{params\}/g.test(funTem)) funTem = funTem.replace(/\, \{params\}/g, pt)
       funTem = funTem.replace(/\{params\}/g, pt)
+      funTem = funTem.replace(/\{description\}/g, eol)
       funTem = funTem.replace(/\n(\n)*( )*(\n)*\n/g, '\n')
       // 3. find api file
       let file = path.join(cwd, 'src', 'shooter', 'api', paths[aths][met]['tags'][0] + 'Api.js')

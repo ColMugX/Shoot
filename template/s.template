@@ -1,20 +1,18 @@
 /**
  * summary: {summary}
  * 
- * @param {Function} data data
+{description}
  * @returns return
  */
   {funcName} ({data}) {
-    const params = {
+    const data = {
       url: {url},
       {header}
-      body: {
+      params: {
         {params}
       }
     }
   
-    return new Promise((resolved, reject) => {
-      ApiManager.{method}(params, res => resolved(res.data), err => reject(err))
-    })
+    return ApiManager.{method}(data)
   },
   //shootMark

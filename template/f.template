@@ -6,8 +6,6 @@
       }
     }
   
-    return new Promise((resolved, reject) => {
-      ApiManager.{method}(params,res => resolved(res.data), err => reject(err))
-    })
+    return ApiManager.{method}(params)
   },
   //shootMark
